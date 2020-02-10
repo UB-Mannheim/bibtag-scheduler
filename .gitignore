@@ -1,0 +1,4 @@
+/cache/*.json
+/cache-test
+.idea
+output.xml
