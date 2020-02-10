@@ -31,11 +31,12 @@ auf Aktualisieren zu drücken.
 
 ### Dateien in den Cache herunterladen
 
-Prinzipiell kann man hier das Skript
+Prinzipiell gibt es ein Skript um die Daten lokal herunterzuladen:
 ```
-./cache/download-data.sh
+cd cache
+./download-data.sh
 ```
-nutzen um die Daten lokal herunterzuladen. Dabei muss man aber die auskommentierten
+Dabei muss man aber die auskommentierten
 Zeilen ggf. anpassen. Zudem werden nur die Daten der bekannten Sessions und
 Präsentationen angefragt. Bei größeren Programmänderungen müssten diese for-Loops
 angepasst werden.

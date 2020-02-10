@@ -2,6 +2,10 @@
 
 set -x
 
+# download main data
+curl -o "bibtag20-index.json" -k "https://www.professionalabstracts.com/api/iplanner/index.php?conf=dbt2020&method=get&model=index"
+sleep 2
+
 # list of all session ids found by
 # jq ".sessions" bibtag20-index.json | grep '"id"' > sessionids
 # and then some text search and replace to bring this in the form needed for the for loop here
