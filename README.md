@@ -1,6 +1,7 @@
 # bibtag-scheduler
 
 ![Python version](https://img.shields.io/badge/python-3.7-blue.svg)
+![License](https://img.shields.io/github/license/UB-Mannheim/bibtag-scheduler.svg)
 
 Erzeugt eine Pentabarf XML Datei aus dem Programm des Bibliothekartags 2020,
 so dass Open Source Apps wie Giggity zur Anzeige des Programms auf mobilen
@@ -13,8 +14,8 @@ Geräten genutzt werden können, z.B.
 ### Mit Giggity
 
 1. Auf Android-Gerät die App [Giggity](https://github.com/Wilm0r/giggity) installieren
-2. Neue Veranstaltung über das `+` hinzufügen
-3. Aktuell erzeugte Datei `https://cloud.bib.uni-mannheim.de/index.php/s/AwMc2ao8C2fX8rJ/download` eingeben
+2. In der Liste der Veranstaltungen `Bibliothekartag 2020` auswählen.
+
 
 ### Aktualisierungen
 
@@ -27,7 +28,15 @@ den Eintrag Bibliothekartag 2020 lange gedrückt halten um dann in dem erscheine
 auf Aktualisieren zu drücken.
 
 
-## Generierung der Datei
+### Download der XML-Datei
+
+Die aktuell erzeuge Pentabarf-XML-Datei kann auch direkt heruntergeladen werden unter:
+```
+https://cloud.bib.uni-mannheim.de/index.php/s/AwMc2ao8C2fX8rJ/download
+```
+
+
+## Generierung der XML-Datei
 
 ### Dateien in den Cache herunterladen
 
