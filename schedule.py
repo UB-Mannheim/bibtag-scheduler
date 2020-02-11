@@ -58,7 +58,7 @@ with open("cache/bibtag20-index.json") as file:
                             # try to recognize here, save the information in a variable, and then delete this node.
                             # Because most of the time there is the other presentation which we should treat as a single
                             # presentation.
-                            diskutantenText = "Diskutantenten: "
+                            diskutantenText = "Diskutanten: "
                             if sessionData['1']['type'] == "Podiumsdiskussion":
                                 for pres in sessionData['1']['pres']:
                                     if sessionData['1']['pres'][pres]['title'] == "Diskutanten":
