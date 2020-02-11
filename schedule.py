@@ -2,6 +2,7 @@
 
 from datetime import date, datetime
 from pathlib import Path
+import html
 import json
 import re
 from xml.dom import minidom
@@ -80,9 +81,9 @@ with open("cache/bibtag20-index.json") as file:
 
                                     # add the prefix "S" with session id to the title of the presentations
                                     if len(startingTimes) > 1:
-                                        title = "S" + session['id'] + ": " + presentationData['titleplain']
+                                        title = "S" + session['id'] + ": " + html.unescape(presentationData['titleplain'])
                                     else:
-                                        title = presentationData['titleplain']
+                                        title = html.unescape(presentationData['titleplain'])
 
                                     start = presentationData['frame'][:5]
                                     end = presentationData['frame'][6:11]
@@ -160,7 +161,7 @@ with open("cache/bibtag20-index.json") as file:
                         duration='%02d:%02d' % ((int(session['length']) // 60), (int(session['length']) % 60)),
                         track=session['type'],
                         abstract=abstract,
-                        title=session['title'],
+                        title=html.unescape(session['title']),
                         type=type,
                     )
 
