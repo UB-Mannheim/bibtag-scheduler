@@ -95,8 +95,13 @@ with open("cache/bibtag20-index.json") as file:
 
                                     if len(startingTimes) > 1:
                                         abstract = "Session: " + session['title'] + " (S" + session['id'] + ")<br/><br/>"
+                                        if 'outline' in session and len(session['outline']) > 0:
+                                            print('WARN: outline for this session is ignored', session['id'], session['outline'])
                                     else:
-                                        abstract = ""
+                                        if 'outline' in session:
+                                            abstract = session['outline'] + "<br/><br/>"
+                                        else:
+                                            abstract = ""
                                     if len(diskutantenText) > 16:
                                         abstract += diskutantenText + ")<br/><br/>"
                                     if Path('cache/p' + str(presentationData['id']) + '.json').is_file():
