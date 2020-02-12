@@ -98,7 +98,7 @@ with open("cache/bibtag20-index.json") as file:
                                         if 'outline' in session and len(session['outline']) > 0:
                                             print('WARN: outline for this session is ignored', session['id'], session['outline'])
                                     else:
-                                        if 'outline' in session:
+                                        if 'outline' in session and len(session['outline']) > 0:
                                             abstract = session['outline'] + "<br/><br/>"
                                         else:
                                             abstract = ""
