@@ -65,7 +65,7 @@ with open("cache/bibtag20-index.json") as file:
                                     if sessionData['1']['pres'][pres]['title'] == "Diskutanten":
                                         diskutanten = sessionData['1']['pres'][pres]
                                         if 'pers' in diskutanten:
-                                            diskutantenArray = [diskutanten['pers'][x]['text']  for x in diskutanten['pers']]
+                                            diskutantenArray = [diskutanten['pers'][x]['text'] for x in diskutanten['pers']]
                                             diskutantenText += "; ".join(diskutantenArray)
                                         del sessionData['1']['pres'][pres]
                                         break
@@ -139,16 +139,15 @@ with open("cache/bibtag20-index.json") as file:
                             else:
                                 print("WARNING: Found several presentations at the same time in this session", session['id'], session['title'], session['type'])
                                 # create an abstract for the whole session which will be added below
-                                abstract = ""
+                                abstract = "<ul>"
                                 for pres in sessionData['1']['pres']:
                                     presentationData = sessionData['1']['pres'][pres]
-                                    abstract += presentationData['titleplain']
+                                    abstract += "<li>" + presentationData['frame'] + ": " + presentationData['titleplain']
                                     if 'pers' in presentationData:
                                         for person in presentationData['pers']:
                                             abstract += '<br/>' + presentationData['pers'][person]['text']
-                                    abstract += '<br/><br/>'
-
-
+                                    abstract += '</li>'
+                                abstract += '</ul>'
 
                             endingTimes = [sessionData['1']['pres'][x]['frame'][6:11] for x in sessionData['1']['pres']]
                             if session['end'] not in endingTimes:
@@ -158,7 +157,9 @@ with open("cache/bibtag20-index.json") as file:
                 if not eventsAdded:
 
                     if 'outline' in session and len(session['outline']) > 0:
-                        abstract = session['outline']
+                        if not abstract:
+                            abstract = ""
+                        abstract = session['outline'] + abstract
                     sessionObject = Event(
                         id=session['id'],
                         date=date.fromtimestamp(int(timestamp)),
