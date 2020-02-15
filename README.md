@@ -38,17 +38,16 @@ https://cloud.bib.uni-mannheim.de/index.php/s/AwMc2ao8C2fX8rJ/download
 
 ## Generierung der XML-Datei
 
+Zuerst muss einmalig man die JSON-Daten herunterladen und als Dateien im `cache` Ordner speichern.
+Daraus kann das Programm als XML-Datei erzeugt werden.
+Der erste Schritt muss nur erneut ausgeführt werden, wenn es Programmänderungen gab.
+
 ### Dateien in den Cache herunterladen
 
-Prinzipiell gibt es ein Skript um die Daten lokal herunterzuladen:
 ```
 cd cache
-./download-data.sh
+python download-data.py
 ```
-Dabei muss man aber die auskommentierten
-Zeilen ggf. anpassen. Zudem werden nur die Daten der bekannten Sessions und
-Präsentationen angefragt. Bei größeren Programmänderungen müssten diese for-Loops
-angepasst werden.
 
 ### Erzeugung der Pentabarf-XML Datei
 
