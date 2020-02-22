@@ -106,7 +106,8 @@ with open("cache/bibtag20-index.json") as file:
                                             minutesDiff += 60
 
                                         if len(startingTimes) > 1:
-                                            abstract = "Session: " + session['title'] + " (S" + session['id'] + ")<br/><br/>"
+                                            sessionUrl = "https://www.professionalabstracts.com/dbt2020/iplanner/#/session/" + session['id']
+                                            abstract = "Session: <a href='" + sessionUrl + "'>" + session['title'] + " (S" + session['id'] + ")</a><br/><br/>"
                                             if 'outline' in session and len(session['outline']) > 0:
                                                 print('WARN: outline for this session is ignored', session['id'], session['outline'])
                                         else:
