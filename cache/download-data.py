@@ -5,6 +5,10 @@ import requests
 import time
 import urllib3
 
+from pathlib import Path
+
+import tweepy
+
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 apiUrl = 'https://www.professionalabstracts.com/api/iplanner/index.php?'
@@ -41,3 +45,26 @@ for presentationId in presentationIds:
     data = req.json()
     with open('p' + str(presentationId) + '.json', 'w') as outfile:
         json.dump(data, outfile, indent=4)
+
+# download twitter data from the collected list of twitter handles by @bibliothekarin
+# https://twitter.com/i/lists/1224758764168994816/members
+if Path('twittercredentials.json').is_file():
+    with open('twittercredentials.json', 'r') as infile:
+        CREDENTIALS = json.load(infile)
+else:
+    print("ERROR: no file twittercredentials.json found.",
+          "You have to create such a file and save your twitter credentials there.")
+    exit(1)
+auth = tweepy.OAuthHandler(CREDENTIALS["consumerKey"], CREDENTIALS["consumerSecret"])
+auth.set_access_token(CREDENTIALS["accessToken"], CREDENTIALS["accessSecret"])
+api = tweepy.API(auth)
+api.verify_credentials()
+
+data = []
+members = tweepy.Cursor(api.list_members, "bibliothekarin", "bibtag2020").items() # change to items(5) for testing
+members = api.list_members("bibliothekarin", "bibtag2020")
+for user in members:
+    data.append(user._json)
+
+with open('twitterhandles.json', 'w') as outfile:
+    json.dump(data, outfile, indent=4)

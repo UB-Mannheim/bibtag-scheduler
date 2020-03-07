@@ -1,2 +1,3 @@
 python-pentabarf-xml
 requests
+tweepy

@@ -5,6 +5,7 @@ from pathlib import Path
 import html
 import json
 import re
+import urllib.parse
 from xml.dom import minidom
 
 from pentabarf.Conference import Conference
@@ -22,6 +23,15 @@ conference = Conference(
     venue="Hannover Congress Centrum (HCC)",
     city="Hannover"
 )
+
+twitterHandles = {}
+if Path('cache/twitterhandles.json').is_file():
+    with open('cache/twitterhandles.json') as twitterFile:
+        twitterData = json.load(twitterFile)
+        for user in twitterData:
+            if user["name"] in twitterHandles:
+                print("WARNING: Found another twitter user with the same name", user["name"])
+            twitterHandles[user["name"]] = user["screen_name"]
 
 with open("cache/bibtag20-index.json") as file:
     data = json.load(file)
@@ -83,7 +93,7 @@ with open("cache/bibtag20-index.json") as file:
 
                             # for some sessions e.g. 62 there are several presentations at the same time, which looks more
                             # like an error or some unusual pattern, and therefore we better don't take the individual
-                            # presentations but hte whole session
+                            # presentations but the whole session
                             startingTimes = [sessionData['1']['pres'][x]['frame'][:5] for x in sessionData['1']['pres']]
                             if len(startingTimes) == len(list(dict.fromkeys(startingTimes))):
 
@@ -131,19 +141,23 @@ with open("cache/bibtag20-index.json") as file:
                                         track=session['type'],
                                         abstract=abstract,
                                         title=title,
-                                        type='Vortrag',
-                                        # TODO is this useful at all?
-                                        conf_url='https://www.professionalabstracts.com/dbt2020/iplanner/#/presentation/'
-                                                 + str(presentationData['id'])
+                                        type='Vortrag'
                                     )
 
+                                    personList = []
                                     if 'aut' in presentationData:
                                         cleanr = re.compile('</?u>|<sup>\d+(,\s*\d+)*</sup>')
                                         authors = re.sub(cleanr, '', presentationData['aut']).split(',')
 
                                         for author in authors:
+                                            if author.strip() in twitterHandles:
+                                                personList.append("@" + twitterHandles[author.strip()])
+                                            else:
+                                                personList.append(author.strip())
                                             person = Person(name=author.strip())
                                             presentationObject.add_person(person)
+                                    tweetContent = urllib.parse.quote_plus(html.unescape(presentationData['titleplain']) + ' | ' + ", ".join(personList))
+                                    presentationObject.abstract += '<p><a href="https://twitter.com/intent/tweet?hashtags=bibtag20&text=' + tweetContent + '">Tweet</a></p>'
 
                                     room.add_event(presentationObject)
 
@@ -201,17 +215,6 @@ with open("output.xml", 'w', encoding="utf-8") as outfile:
     # delete day_change as it cannot be empty
     for node in reparsed.getElementsByTagName('day_change'):
         node.parentNode.removeChild(node)
-    # use links/link instead of conf_url
-    for node in reparsed.getElementsByTagName('conf_url'):
-        if len(node.toxml()[10:-11]) > 0:
-            linksNode = reparsed.createElement('links')
-            node.parentNode.appendChild(linksNode)
-            linkNode = reparsed.createElement('link')
-            linksNode.appendChild(linkNode)
-            linkNode.setAttribute('href', node.toxml()[10:-11])
-            textNode = reparsed.createTextNode('DBT2020')
-            linkNode.appendChild(textNode)
-            node.parentNode.removeChild(node)
     # delete some empty nodes and empty attributes
     deleted = 0
     for ignore in ['description', 'conf_url', 'full_conf_url', 'released']:

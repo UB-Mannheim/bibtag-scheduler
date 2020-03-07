@@ -49,6 +49,9 @@ cd cache
 python download-data.py
 ```
 
+Für die Twitter-Daten benötigt man zuerst entsprechende [Credentials](https://developer.twitter.com/en/apps)
+und muss diese in einer Datei `cache/twittercredentials.json` als JSON speichern
+
 ### Erzeugung der Pentabarf-XML Datei
 
 ```
