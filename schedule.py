@@ -4,7 +4,6 @@ from datetime import date, datetime
 from pathlib import Path
 import html
 import json
-import re
 import urllib.parse
 from xml.dom import minidom
 
@@ -15,13 +14,13 @@ from pentabarf.Person import Person
 from pentabarf.Room import Room
 
 conference = Conference(
-    title="Bibliothekartag 2020",
-    start=date(2020, 5, 26),
-    end=date(2020, 5, 29),
-    days=4,
+    title="Bibliothekskongress 2022",
+    start=date(2022, 5, 31),
+    end=date(2022, 6, 2),
+    days=3,
     timeslot_duration="00:30",
-    venue="Hannover Congress Centrum (HCC)",
-    city="Hannover"
+    venue="Congress Center Leipzig",
+    city="Leipzig"
 )
 
 twitterHandles = {}
@@ -33,173 +32,171 @@ if Path('cache/twitterhandles.json').is_file():
                 print("WARNING: Found another twitter user with the same name", user["name"])
             twitterHandles[user["name"]] = user["screen_name"]
 
-with open("cache/bibtag20-index.json") as file:
+with open("cache/bibtag22-index.json") as file:
     data = json.load(file)
-    for timestamp in sorted(data['groups']):
-        day = Day(date=date.fromtimestamp(int(timestamp)))
+    allDays = ["2022-05-31", "2022-06-01", "2022-06-02"]
+    differentDays = [x['day']['date'] for x in data if x['day']['date'] not in allDays]
+    if len(differentDays) > 0:
+        print("ERROR: different days are found, which has to fixed before continuing", differentDays)
+        exit()
+    rooms = [
+        "Saal 1 (mit Streaming)",
+        "Saal 2 (mit Streaming)",
+        "Saal 3",
+        "Saal 4",
+        "Saal 5",
+        "Seminarraum 6/7",
+        "Seminarraum 8",
+        "#Freiraum22",
+        "Vortragsraum 9 (mit Streaming)",
+        "Vortragsraum 10",
+        "Vortragsraum 11",
+        "Vortragsraum 12",
+        "Seminarraum 13",
+        "Seminarraum 14/15",
+        "M3 (Messehaus)",
+        "M5 (Messehaus)",
+        "Beratungsraum 3",
+        "Bankettraum 4",
+        "Außerhalb",
+    ]
+    differentRooms = [x['room']['name'] for x in data if x['room']['name'] not in rooms]
+    if len(differentRooms) > 0:
+        print("ERROR: different rooms are found, which has to fixed before continuing", differentRooms)
+        exit()
 
-        rooms = [
-            "Kuppelsaal", "Eilenriedehalle B", "Niedersachsenhalle A", "Niedersachsenhalle B", "Leibniz Saal",
-            "Blauer Saal", "Roter Saal", "Konferenzraum 27/28", "Bonatz Saal", "Future Meeting Space A",
-            "Future Meeting Space B", "Konferenzraum 07/09", "Konferenzraum 08/10", "Konferenzraum 11/13",
-            "Konferenzraum 12/14", "Konferenzraum 15", "Konferenzraum 16", "Konferenzraum 17", "Konferenzraum 18",
-            "Konferenzraum 19", "Konferenzraum 20", "Konferenzraum 21", "Konferenzraum 22", "Podium der Verbände",
-            "Stand der Verbände", "Foyers", "Ausserhalb"
-        ]
-        differentRooms = [x['room'] for x in data['sessions'][timestamp] if x['room'] not in rooms]
-        if len(differentRooms) > 0:
-            print("ERROR: different rooms are found, which has to fixed before continuing", differentRooms)
-            exit()
-
+    for dayText in allDays:
+        time = datetime.strptime(dayText, "%Y-%m-%d").isoformat('T')#temp
+        day = Day(date=datetime.strptime(dayText, "%Y-%m-%d"))
+        #day = Day(date=date.fromisoformat(dayText))
         for roomName in rooms:
-            correspondingSessions = [x for x in data['sessions'][timestamp] if x['room'] == roomName]
+            correspondingSessions = [x for x in data if x['room']['name'] == roomName and x['day']['date'] == dayText]
             room = Room(name=roomName)
             for session in correspondingSessions:
+                session['id'] = str(session['id'])
                 abstract = None
 
-                type = session['type']
-                if session['type'].startswith('Themenkreis'):
+                type = session['session_type']['name']
+                if type.startswith('Themenkreis'):
                     type = "Vortragssession"
-                if session['type'].startswith('Hands-On Lab'):
-                    type = "Hands-On Lab"
+                #if session['type'].startswith('Hands-On Lab'):
+                #    type = "Hands-On Lab"
 
                 eventsAdded = False
                 # try to add the presentations instead of the complete session
                 # thus first check whether there are some additional data for this session
-                if Path('cache/s' + session['id'] + '.json').is_file():
-                    with open('cache/s' + session['id'] + '.json') as sessionFile:
-                        sessionData = json.load(sessionFile)
-                        if 'pres' in sessionData['1']:
+                if Path('cache/s' + str(session['id']) + '.json').is_file():
+                    with open('cache/s' + str(session['id']) + '.json') as sessionFile:
+                        sessionData = json.load(sessionFile)[0]
 
-                            # copy the outline to the session such that it can also be used if there are no
-                            # presentation to add
-                            if 'outline' in sessionData['1']:
-                                session['outline'] = sessionData['1']['outline']
-
-                            # For Podiumsdiskussion the Diskutantent are saved in an additional presentation, which we
-                            # try to recognize here, save the information in a variable, and then delete this node.
-                            # Because most of the time there is the other presentation which we should treat as a single
-                            # presentation.
-                            diskutantenText = "Diskutanten: "
-                            if sessionData['1']['type'] == "Podiumsdiskussion":
-                                for pres in sessionData['1']['pres']:
-                                    if sessionData['1']['pres'][pres]['title'] == "Diskutanten":
-                                        diskutanten = sessionData['1']['pres'][pres]
-                                        if 'pers' in diskutanten:
-                                            diskutantenArray = [diskutanten['pers'][x]['text'] for x in sorted(diskutanten['pers'])]
-                                            diskutantenText += "; ".join(diskutantenArray)
-                                        del sessionData['1']['pres'][pres]
-                                        break
-
-                            # for some sessions e.g. 62 there are several presentations at the same time, which looks more
+                        if 'presentations' in sessionData and len(sessionData['presentations']) > 0:
+                            # for some sessions (e.g. the opening) there are several presentations at the same time, which looks more
                             # like an error or some unusual pattern, and therefore we better don't take the individual
                             # presentations but the whole session
-                            startingTimes = [sessionData['1']['pres'][x]['frame'][:5] for x in sessionData['1']['pres']]
+                            startingTimes = [x['start_time'] for x in sessionData['presentations']]
                             if len(startingTimes) == len(list(dict.fromkeys(startingTimes))):
 
-                                for pres in sorted(sessionData['1']['pres']):
-                                    presentationData = sessionData['1']['pres'][pres]
+                                for presentationData in sessionData['presentations']:
 
                                     # add the prefix "S" with session id to the title of the presentations
                                     if len(startingTimes) > 1:
-                                        title = "S" + session['id'] + ": " + html.unescape(presentationData['titleplain'])
+                                        title = "S" + str(session['id']) + ": " + html.unescape(presentationData['title'])
                                     else:
-                                        title = html.unescape(presentationData['titleplain'])
+                                        title = html.unescape(presentationData['title'])
 
-                                    start = presentationData['frame'][:5]
-                                    end = presentationData['frame'][6:11]
+                                    start = presentationData['start_time']
+                                    end = presentationData['end_time']
+                                    if len(startingTimes) == 1 and start == end:
+                                        start = session['start_time']
+                                        end = session['end_time']
                                     hoursDiff = int(end[:2]) - int(start[:2])
                                     minutesDiff = int(end[3:5]) - int(start[3:5])
                                     if minutesDiff < 0:
                                         hoursDiff -= 1
                                         minutesDiff += 60
 
+                                    abstract = ""
                                     if len(startingTimes) > 1:
-                                        sessionUrl = "https://www.professionalabstracts.com/dbt2020/iplanner/#/session/" + session['id']
+                                        sessionUrl = "https://bid2022.abstractserver.com/program/#/details/sessions/" + session['id']
                                         abstract = "Session: <a href='" + sessionUrl + "'>" + session['title'] + " (S" + session['id'] + ")</a><br/><br/>"
-                                        if 'outline' in session and len(session['outline']) > 0:
-                                            print('WARN: outline for this session is ignored', session['id'], session['outline'])
-                                    else:
-                                        if 'outline' in session and len(session['outline']) > 0:
-                                            abstract = session['outline'] + "<br/><br/>"
-                                        else:
-                                            abstract = ""
-                                    if len(diskutantenText) > 16:
-                                        abstract += diskutantenText + ")<br/><br/>"
+                                        #if session['content']['outline'] is not None:
+                                        #    print('WARN: outline for this session is ignored', session['id'], session['content']['outline'])
+
+                                    abstractAdded = False
                                     if Path('cache/p' + str(presentationData['id']) + '.json').is_file():
                                         with open('cache/p' + str(presentationData['id']) + '.json') as presentationFile:
-                                            presentationFileData = json.load(presentationFile)
-                                            abstract += presentationFileData['text']
-                                            abstract += "<br/><br/>" + presentationFileData['aut']
-                                            abstract += "<br/>" + presentationFileData['inst']
+                                            presentationFileData = json.load(presentationFile)[0]
+                                            if 'abstract_enriched' in presentationFileData:
+                                                abstract += presentationFileData['abstract_enriched']
+                                                abstractAdded = True
+                                    if not abstractAdded and len(startingTimes) == 1:
+                                        if session['content']['outline'] is not None:
+                                            abstract = session['content']['outline']
 
                                     presentationObject = Event(
                                         id='p' + str(presentationData['id']),
-                                        date=date.fromtimestamp(int(timestamp)),
+                                        date=datetime.fromisoformat(dayText + "T" + start + ":00+02:00"),
                                         start=start,
                                         duration='%02d:%02d' % (hoursDiff, minutesDiff),
-                                        track=session['type'],
+                                        track=session['session_type']['name'],
                                         abstract=abstract,
                                         title=title,
                                         type='Vortrag'
                                     )
 
                                     personList = []
-                                    if 'aut' in presentationData:
-                                        cleanr = re.compile('</?u>|<sup>\d+(,\s*\d+)*</sup>')
-                                        authors = re.sub(cleanr, '', presentationData['aut']).split(',')
-
-                                        for author in authors:
-                                            if author.strip() in twitterHandles:
-                                                personList.append("@" + twitterHandles[author.strip()])
-                                            else:
-                                                personList.append(author.strip())
-                                            person = Person(name=author.strip())
-                                            presentationObject.add_person(person)
-                                    tweetContent = urllib.parse.quote_plus(html.unescape(presentationData['titleplain']) + ' | ' + ", ".join(personList))
-                                    presentationObject.abstract += '<p><a href="https://twitter.com/intent/tweet?hashtags=bibtag20&text=' + tweetContent + '">Tweet</a></p>'
+                                    for author in presentationData['persons']:
+                                        authorName = author['person']['first_name'] + ' ' + author['person']['last_name']
+                                        if authorName in twitterHandles:
+                                            personList.append("@" + twitterHandles[authorName.strip()])
+                                        else:
+                                            personList.append(authorName)
+                                        person = Person(name=authorName, id=author['person']['id'])
+                                        presentationObject.add_person(person)
+                                    tweetContent = urllib.parse.quote_plus(html.unescape(presentationData['title']) + ' | ' + ", ".join(personList))
+                                    presentationObject.abstract += '<p><a href="https://twitter.com/intent/tweet?hashtags=bibtag22&text=' + tweetContent + '">Tweet</a></p>'
 
                                     room.add_event(presentationObject)
 
                                 eventsAdded = True
                             else:
-                                print("WARNING: Found several presentations at the same time in this session", session['id'], session['title'], session['type'])
+                                print("WARNING: Found several presentations at the same time in this session", session['id'], session['title'], session['session_type']['name'])
                                 # create an abstract for the whole session which will be added below
                                 abstract = "<ul>"
-                                for pres in sorted(sessionData['1']['pres']):
-                                    presentationData = sessionData['1']['pres'][pres]
-                                    abstract += "<li>" + presentationData['frame'] + ": " + presentationData['titleplain']
-                                    if 'pers' in presentationData:
-                                        for person in sorted(presentationData['pers']):
-                                            abstract += '<br/>' + presentationData['pers'][person]['text']
+                                for presentationData in sessionData['presentations']:
+                                    abstract += "<li>" + presentationData['start_time'] + "-" + presentationData['end_time'] + ": " + presentationData['title']
+                                    if 'persons' in presentationData:
+                                        for author in presentationData['persons']:
+                                            abstract += '<br/>' + author['person']['first_name'] + ' ' + author['person']['last_name']
                                     abstract += '</li>'
                                 abstract += '</ul>'
 
-                            endingTimes = [sessionData['1']['pres'][x]['frame'][6:11] for x in sessionData['1']['pres']]
-                            if session['end'] not in endingTimes:
-                                print("WARNING: Session goes longer than any presentation", session['id'], session['title'], session['date'], session['time'])
+                            endingTimes = [x['end_time'] for x in sessionData['presentations']]
+                            if session['end_time'] not in endingTimes:
+                                print("WARNING: Session goes longer than any presentation", session['id'], session['title'], dayText, session['start_time'], session['end_time'])
 
                 # add event for the whole session when no events are yet added
                 if not eventsAdded:
 
-                    if 'outline' in session and len(session['outline']) > 0:
+                    if 'content' in session and 'outline' in session['content'] and session['content']['outline'] != None:
                         if not abstract:
                             abstract = ""
-                        abstract = session['outline'] + abstract
+                        abstract = session['content']['outline'] + abstract
+                    duration = (session['end_time_timestamp'] - session['start_time_timestamp'] ) // 60
                     sessionObject = Event(
                         id=session['id'],
-                        date=date.fromtimestamp(int(timestamp)),
-                        start=session['start'],
-                        duration='%02d:%02d' % ((int(session['length']) // 60), (int(session['length']) % 60)),
-                        track=session['type'],
+                        date=datetime.fromisoformat(dayText + "T" + session['start_time'] + ":00+02:00"),
+                        start=session['start_time'],
+                        duration='%02d:%02d' % ((duration // 60), (duration % 60)),
+                        track=session['session_type']['name'],
                         abstract=abstract,
                         title=html.unescape(session['title']),
                         type=type,
                     )
 
-                    if sessionData and 'pers' in sessionData['1']:
-                        for author in sorted(sessionData['1']['pers']):
-                            person = Person(name=sessionData['1']['pers'][author]['text'].split(',')[0])
+                    if sessionData and 'persons' in sessionData:
+                        for author in sessionData['persons']:
+                            person = Person(name=author['person']['first_name'] + ' ' + author['person']['last_name'], id=author['person']['id'])
                             sessionObject.add_person(person)
 
                     room.add_event(sessionObject)
@@ -209,7 +206,7 @@ with open("cache/bibtag20-index.json") as file:
         conference.add_day(day)
 
 
-with open("output.xml", 'w', encoding="utf-8") as outfile:
+with open("bibtag22.xml", 'w', encoding="utf-8") as outfile:
     xmldata = conference.generate("Erzeugt von https://github.com/UB-Mannheim/bibtag-scheduler/ um " + str(datetime.now()))
     reparsed = minidom.parseString(xmldata.decode("utf-8"))
     # delete day_change as it cannot be empty
@@ -222,7 +219,11 @@ with open("output.xml", 'w', encoding="utf-8") as outfile:
             if node.toxml() == "<" + ignore + "/>":
                 node.parentNode.removeChild(node)
                 deleted += 1
-    print("INFO: Deleted", deleted, "empty nodes")
+    # delete all date nodes which are unneccessary and make trouble because of the timezoning
+    #for node in reparsed.getElementsByTagName('date'):
+    #    node.parentNode.removeChild(node)
+    #    deleted += 1
+    print("INFO: Deleted", deleted, "empty nodes + date nodes")
     for node in reparsed.getElementsByTagName('person'):
         if node.getAttribute('id') == "None":
             node.removeAttribute('id')
