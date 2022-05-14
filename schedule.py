@@ -76,9 +76,9 @@ with open("cache/bibtag22-index.json") as file:
                 session['id'] = str(session['id'])
                 abstract = None
 
-                type = session['session_type']['name']
-                if type.startswith('Themenkreis'):
-                    type = "Vortragssession"
+                meeting_type = session['session_type']['name']
+                if meeting_type.startswith('Themenkreis') or meeting_type.startswith('TK'):
+                    meeting_type = "Vortragssession"
                 #if session['type'].startswith('Hands-On Lab'):
                 #    type = "Hands-On Lab"
 
@@ -191,7 +191,7 @@ with open("cache/bibtag22-index.json") as file:
                         track=session['session_type']['name'],
                         abstract=abstract,
                         title=html.unescape(session['title']),
-                        type=type,
+                        type=meeting_type,
                     )
 
                     if sessionData and 'persons' in sessionData:

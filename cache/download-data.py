@@ -13,7 +13,6 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 numberOfDays = 3
 apiUrl = 'https://bid2022.planner.documedias.systems/api'
-#[2020] indexUrl = apiUrl + 'conf=dbt2020&method=get&model=index'
 #https://bid2022.planner.documedias.systems/api/program/days/1
 #https://bid2022.planner.documedias.systems/api/program/days/2
 #https://bid2022.planner.documedias.systems/api/program/days/3
@@ -75,10 +74,9 @@ for presentationId in presentationIds:
             abstract = dataAbstract[abstractId]
             data[0]["abstract_enriched"] = abstract
     else:
-        print(req.status_code, "Error when requesting the abstract", abstractUrl)
+        print(req.status_code, "Error when requesting the abstract", abstractUrl, "for presentation", presentationId, data[0]["title"])
     with open('p' + str(presentationId) + '.json', 'w') as outfile:
         json.dump(data, outfile, indent=4)
-
 
 # download twitter data from the collected list of twitter handles by @bibliothekarin
 # https://twitter.com/i/lists/1518677854812258304/members
@@ -89,14 +87,14 @@ else:
     print("ERROR: no file twittercredentials.json found.",
           "You have to create such a file and save your twitter credentials there.")
     exit(1)
+
 auth = tweepy.OAuthHandler(CREDENTIALS["consumerKey"], CREDENTIALS["consumerSecret"])
 auth.set_access_token(CREDENTIALS["accessToken"], CREDENTIALS["accessSecret"])
 api = tweepy.API(auth)
 api.verify_credentials()
 
 data = []
-#members = tweepy.Cursor(api.list_members, "bibliothekarin", "bibtag2020").items() # change to items(5) for testing
-members = api.list_members("bibliothekarin", "1518677854812258304")
+members = api.get_list_members(list_id=1518677854812258304)
 for user in members:
     data.append(user._json)
 

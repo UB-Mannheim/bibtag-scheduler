@@ -1,4 +1,7 @@
 /cache/*.json
+/cache/presentationtIds
 /cache-test
 .idea
 output.xml
+bibtag22.xml
+/venv
