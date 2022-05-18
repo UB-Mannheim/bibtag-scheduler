@@ -94,7 +94,7 @@ api = tweepy.API(auth)
 api.verify_credentials()
 
 data = []
-members = api.get_list_members(list_id=1518677854812258304)
+members = api.get_list_members(list_id=1518677854812258304, count=500)
 for user in members:
     data.append(user._json)
 

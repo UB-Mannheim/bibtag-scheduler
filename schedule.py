@@ -28,9 +28,10 @@ if Path('cache/twitterhandles.json').is_file():
     with open('cache/twitterhandles.json') as twitterFile:
         twitterData = json.load(twitterFile)
         for user in twitterData:
-            if user["name"] in twitterHandles:
+            name = user["name"].encode('latin1', 'ignore').decode('latin1').strip()
+            if name in twitterHandles:
                 print("WARNING: Found another twitter user with the same name", user["name"])
-            twitterHandles[user["name"]] = user["screen_name"]
+            twitterHandles[name] = user["screen_name"]
 
 with open("cache/bibtag22-index.json") as file:
     data = json.load(file)
