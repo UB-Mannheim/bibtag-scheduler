@@ -66,7 +66,6 @@ with open('presentationtIds', 'w') as outfile:
 for presentationId in presentationIds:
     time.sleep(2)
     print("Download presentation details for", presentationId)
-    print(presentationUrl + str(presentationId))
     req = requests.get(presentationUrl + str(presentationId), verify=False)
 
     data = req.json()

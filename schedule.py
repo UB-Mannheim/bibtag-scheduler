@@ -202,25 +202,32 @@ with open("cache/index.json") as file:
         conference.add_day(day)
 
 
+xmldata = conference.generate("Erzeugt von https://github.com/UB-Mannheim/bibtag-scheduler/ um " + str(datetime.now()))
+reparsed = minidom.parseString(xmldata.decode("utf-8"))
+# delete day_change as it cannot be empty
+for node in reparsed.getElementsByTagName('day_change'):
+    node.parentNode.removeChild(node)
+# delete some empty nodes and empty attributes
+deleted = 0
+for ignore in ['description', 'conf_url', 'full_conf_url', 'released']:
+    for node in reparsed.getElementsByTagName(ignore):
+        if node.toxml() == "<" + ignore + "/>":
+            node.parentNode.removeChild(node)
+            deleted += 1
+# delete all date nodes which are unneccessary and make trouble because of the timezoning
+#for node in reparsed.getElementsByTagName('date'):
+#    node.parentNode.removeChild(node)
+#    deleted += 1
+print("INFO: Deleted", deleted, "empty nodes + date nodes")
+for node in reparsed.getElementsByTagName('person'):
+    if node.getAttribute('id') == "None":
+        node.removeAttribute('id')
+
+# Output in file
 with open("bibliocon23.xml", 'w', encoding="utf-8") as outfile:
-    xmldata = conference.generate("Erzeugt von https://github.com/UB-Mannheim/bibtag-scheduler/ um " + str(datetime.now()))
-    reparsed = minidom.parseString(xmldata.decode("utf-8"))
-    # delete day_change as it cannot be empty
-    for node in reparsed.getElementsByTagName('day_change'):
-        node.parentNode.removeChild(node)
-    # delete some empty nodes and empty attributes
-    deleted = 0
-    for ignore in ['description', 'conf_url', 'full_conf_url', 'released']:
-        for node in reparsed.getElementsByTagName(ignore):
-            if node.toxml() == "<" + ignore + "/>":
-                node.parentNode.removeChild(node)
-                deleted += 1
-    # delete all date nodes which are unneccessary and make trouble because of the timezoning
-    #for node in reparsed.getElementsByTagName('date'):
-    #    node.parentNode.removeChild(node)
-    #    deleted += 1
-    print("INFO: Deleted", deleted, "empty nodes + date nodes")
-    for node in reparsed.getElementsByTagName('person'):
-        if node.getAttribute('id') == "None":
-            node.removeAttribute('id')
     outfile.write(reparsed.toprettyxml(indent="  "))
+# Save another copy which will not be overwritten, when rerun on another day
+name = "bibliocon23-" + str(date.today()) + ".xml"
+with open(name, 'w', encoding="utf-8") as outfile:
+    outfile.write(reparsed.toprettyxml(indent="  "))
+# Inspect differences in the output files with e.g. git diff
