@@ -14,52 +14,52 @@ from pentabarf.Person import Person
 from pentabarf.Room import Room
 
 conference = Conference(
-    title="Bibliothekskongress 2022",
-    start=date(2022, 5, 31),
-    end=date(2022, 6, 2),
-    days=3,
+    title="BiblioCon 2023",
+    start=date(2023, 5, 23),
+    end=date(2023, 5, 26),
+    days=4,
     timeslot_duration="00:30",
-    venue="Congress Center Leipzig",
-    city="Leipzig"
+    venue="Hannover Congress Centrum",
+    city="Hannover"
 )
 
-twitterHandles = {}
-if Path('cache/twitterhandles.json').is_file():
-    with open('cache/twitterhandles.json') as twitterFile:
-        twitterData = json.load(twitterFile)
-        for user in twitterData:
-            name = user["name"].encode('latin1', 'ignore').decode('latin1').strip()
-            if name in twitterHandles:
-                print("WARNING: Found another twitter user with the same name", user["name"])
-            twitterHandles[name] = user["screen_name"]
+# twitterHandles = {}
+# if Path('cache/twitterhandles.json').is_file():
+#     with open('cache/twitterhandles.json') as twitterFile:
+#         twitterData = json.load(twitterFile)
+#         for user in twitterData:
+#             name = user["name"].encode('latin1', 'ignore').decode('latin1').strip()
+#             if name in twitterHandles:
+#                 print("WARNING: Found another twitter user with the same name", user["name"])
+#             twitterHandles[name] = user["screen_name"]
 
-with open("cache/bibtag22-index.json") as file:
+with open("cache/index.json") as file:
     data = json.load(file)
-    allDays = ["2022-05-31", "2022-06-01", "2022-06-02"]
+    allDays = ["2023-05-23", "2023-05-24", "2023-05-25", "2023-05-26"]
     differentDays = [x['day']['date'] for x in data if x['day']['date'] not in allDays]
     if len(differentDays) > 0:
         print("ERROR: different days are found, which has to fixed before continuing", differentDays)
         exit()
     rooms = [
-        "Saal 1 (mit Streaming)",
-        "Saal 2 (mit Streaming)",
-        "Saal 3",
-        "Saal 4",
-        "Saal 5",
-        "Seminarraum 6/7",
-        "Seminarraum 8",
-        "#Freiraum22",
-        "Vortragsraum 9 (mit Streaming)",
-        "Vortragsraum 10",
-        "Vortragsraum 11",
-        "Vortragsraum 12",
-        "Seminarraum 13",
-        "Seminarraum 14/15",
-        "M3 (Messehaus)",
-        "M5 (Messehaus)",
-        "Beratungsraum 3",
-        "Bankettraum 4",
-        "Außerhalb",
+        "Kuppelsaal",
+        "Niedersachsenhalle A (mit Streaming)",
+        "Eilenriedehalle B",
+        "Blauer Saal",
+        "Roter Saal (mit Streaming)",
+        "Konferenzraum 27/28",
+        "Bonatz Saal (mit Streaming)",
+        "Runder Saal",
+        "Future Meeting Space A",
+        "Future Meeting Space B",
+        "Konferenzraum 7 & 9",
+        "Konferenzraum 8 & 10",
+        "Konferenzraum 11 & 13",
+        "Konferenzraum 12 & 14",
+        "Konferenzraum 15",
+        "Konferenzraum 16",
+        "Konferenzraum 17",
+        "Konferenzraum 18",
+        "Foyers",
     ]
     differentRooms = [x['room']['name'] for x in data if x['room']['name'] not in rooms]
     if len(differentRooms) > 0:
@@ -99,11 +99,14 @@ with open("cache/bibtag22-index.json") as file:
 
                                 for presentationData in sessionData['presentations']:
 
+                                    title = html.unescape(presentationData['presentation']['title'])
+                                    # some titles are put into unneccessary html tags, which we want to clean away
+                                    # e.g. <p data-pm-slice="1 1 []">Ground Truth-Erstellung und Modelltraining mit eScriptorium</p>
+                                    if title[0] == "<" and title[-1] == ">":
+                                        title = title[title.find(">")+1:title.rfind("<")]
                                     # add the prefix "S" with session id to the title of the presentations
                                     if len(startingTimes) > 1:
-                                        title = "S" + str(session['id']) + ": " + html.unescape(presentationData['title'])
-                                    else:
-                                        title = html.unescape(presentationData['title'])
+                                        title = "S" + str(session['id']) + ": " + title
 
                                     start = presentationData['start_time']
                                     end = presentationData['end_time']
@@ -118,14 +121,14 @@ with open("cache/bibtag22-index.json") as file:
 
                                     abstract = ""
                                     if len(startingTimes) > 1:
-                                        sessionUrl = "https://bid2022.abstractserver.com/program/#/details/sessions/" + session['id']
+                                        sessionUrl = "https://dbt2023.abstractserver.com/program/#/details/sessions/" + session['id']
                                         abstract = "Session: <a href='" + sessionUrl + "'>" + session['title'] + " (S" + session['id'] + ")</a><br/><br/>"
                                         #if session['content']['outline'] is not None:
                                         #    print('WARN: outline for this session is ignored', session['id'], session['content']['outline'])
 
                                     abstractAdded = False
-                                    if Path('cache/p' + str(presentationData['id']) + '.json').is_file():
-                                        with open('cache/p' + str(presentationData['id']) + '.json') as presentationFile:
+                                    if Path('cache/p' + str(presentationData['presentation']['id']) + '.json').is_file():
+                                        with open('cache/p' + str(presentationData['presentation']['id']) + '.json') as presentationFile:
                                             presentationFileData = json.load(presentationFile)[0]
                                             if 'abstract_enriched' in presentationFileData:
                                                 abstract += presentationFileData['abstract_enriched']
@@ -133,9 +136,13 @@ with open("cache/bibtag22-index.json") as file:
                                     if not abstractAdded and len(startingTimes) == 1:
                                         if session['content']['outline'] is not None:
                                             abstract = session['content']['outline']
+                                    if 'target_group' in presentationFileData['content'] and presentationFileData['content']['target_group'] is not None:
+                                        abstract += "<p><strong>Zielgruppe:</strong> " + presentationFileData['content']['target_group'] + "</p>"
+                                    if 'stich_schlagwort' in presentationFileData['content'] and presentationFileData['content']['stich_schlagwort'] is not None:
+                                        abstract += "<p><strong>Stichworte:</strong> " + presentationFileData['content']['stich_schlagwort'] + "</p>"
 
                                     presentationObject = Event(
-                                        id='p' + str(presentationData['id']),
+                                        id='p' + str(presentationData['presentation']['id']),
                                         date=datetime.fromisoformat(dayText + "T" + start + ":00+02:00"),
                                         start=start,
                                         duration='%02d:%02d' % (hoursDiff, minutesDiff),
@@ -145,17 +152,17 @@ with open("cache/bibtag22-index.json") as file:
                                         type='Vortrag'
                                     )
 
-                                    personList = []
-                                    for author in presentationData['persons']:
+                                    # personList = []
+                                    for author in presentationData['presentation']['persons']:
                                         authorName = author['person']['first_name'] + ' ' + author['person']['last_name']
-                                        if authorName in twitterHandles:
-                                            personList.append("@" + twitterHandles[authorName.strip()])
-                                        else:
-                                            personList.append(authorName)
+                                        # if authorName in twitterHandles:
+                                        #     personList.append("@" + twitterHandles[authorName.strip()])
+                                        # else:
+                                        #     personList.append(authorName)
                                         person = Person(name=authorName, id=author['person']['id'])
                                         presentationObject.add_person(person)
-                                    tweetContent = urllib.parse.quote_plus(html.unescape(presentationData['title']) + ' | ' + ", ".join(personList))
-                                    presentationObject.abstract += '<p><a href="https://twitter.com/intent/tweet?hashtags=bibtag22&text=' + tweetContent + '">Tweet</a></p>'
+                                    #tweetContent = urllib.parse.quote_plus(html.unescape(presentationData['title']) + ' | ' + ", ".join(personList))
+                                    #presentationObject.abstract += '<p><a href="https://twitter.com/intent/tweet?hashtags=bibtag22&text=' + tweetContent + '">Tweet</a></p>'
 
                                     room.add_event(presentationObject)
 
@@ -165,9 +172,9 @@ with open("cache/bibtag22-index.json") as file:
                                 # create an abstract for the whole session which will be added below
                                 abstract = "<ul>"
                                 for presentationData in sessionData['presentations']:
-                                    abstract += "<li>" + presentationData['start_time'] + "-" + presentationData['end_time'] + ": " + presentationData['title']
-                                    if 'persons' in presentationData:
-                                        for author in presentationData['persons']:
+                                    abstract += "<li>" + presentationData['start_time'] + "-" + presentationData['end_time'] + ": " + presentationData['presentation']['title']
+                                    if 'persons' in presentationData['presentation']:
+                                        for author in presentationData['presentation']['persons']:
                                             abstract += '<br/>' + author['person']['first_name'] + ' ' + author['person']['last_name']
                                     abstract += '</li>'
                                 abstract += '</ul>'
@@ -183,6 +190,10 @@ with open("cache/bibtag22-index.json") as file:
                         if not abstract:
                             abstract = ""
                         abstract = session['content']['outline'] + abstract
+                    if 'target_group' in session['content'] and session['content']['target_group'] is not None:
+                        abstract += "<p><strong>Zielgruppe:</strong> " + session['content']['target_group'] + "</p>"
+                    if 'stich_schlagwort' in session['content'] and session['content']['stich_schlagwort'] is not None:
+                        abstract += "<p><strong>Stichworte:</strong> " + session['content']['stich_schlagwort'] + "</p>"
                     duration = (session['end_time_timestamp'] - session['start_time_timestamp'] ) // 60
                     sessionObject = Event(
                         id=session['id'],
@@ -207,7 +218,7 @@ with open("cache/bibtag22-index.json") as file:
         conference.add_day(day)
 
 
-with open("bibtag22.xml", 'w', encoding="utf-8") as outfile:
+with open("bibliocon23.xml", 'w', encoding="utf-8") as outfile:
     xmldata = conference.generate("Erzeugt von https://github.com/UB-Mannheim/bibtag-scheduler/ um " + str(datetime.now()))
     reparsed = minidom.parseString(xmldata.decode("utf-8"))
     # delete day_change as it cannot be empty

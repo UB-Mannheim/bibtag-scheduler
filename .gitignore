@@ -1,7 +1,9 @@
 /cache/*.json
 /cache/presentationtIds
 /cache-test
+/cache2022
 .idea
 output.xml
 bibtag22.xml
+bibliocon23.xml
 /venv
