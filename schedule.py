@@ -23,16 +23,6 @@ conference = Conference(
     city="Hannover"
 )
 
-# twitterHandles = {}
-# if Path('cache/twitterhandles.json').is_file():
-#     with open('cache/twitterhandles.json') as twitterFile:
-#         twitterData = json.load(twitterFile)
-#         for user in twitterData:
-#             name = user["name"].encode('latin1', 'ignore').decode('latin1').strip()
-#             if name in twitterHandles:
-#                 print("WARNING: Found another twitter user with the same name", user["name"])
-#             twitterHandles[name] = user["screen_name"]
-
 with open("cache/index.json") as file:
     data = json.load(file)
     allDays = ["2023-05-23", "2023-05-24", "2023-05-25", "2023-05-26"]
@@ -100,7 +90,7 @@ with open("cache/index.json") as file:
                                 for presentationData in sessionData['presentations']:
 
                                     title = html.unescape(presentationData['presentation']['title'])
-                                    # some titles are put into unneccessary html tags, which we want to clean away
+                                    # some titles are put into unnecessary html tags, which we want to clean away
                                     # e.g. <p data-pm-slice="1 1 []">Ground Truth-Erstellung und Modelltraining mit eScriptorium</p>
                                     if title[0] == "<" and title[-1] == ">":
                                         title = title[title.find(">")+1:title.rfind("<")]
@@ -155,14 +145,8 @@ with open("cache/index.json") as file:
                                     # personList = []
                                     for author in presentationData['presentation']['persons']:
                                         authorName = author['person']['first_name'] + ' ' + author['person']['last_name']
-                                        # if authorName in twitterHandles:
-                                        #     personList.append("@" + twitterHandles[authorName.strip()])
-                                        # else:
-                                        #     personList.append(authorName)
                                         person = Person(name=authorName, id=author['person']['id'])
                                         presentationObject.add_person(person)
-                                    #tweetContent = urllib.parse.quote_plus(html.unescape(presentationData['title']) + ' | ' + ", ".join(personList))
-                                    #presentationObject.abstract += '<p><a href="https://twitter.com/intent/tweet?hashtags=bibtag22&text=' + tweetContent + '">Tweet</a></p>'
 
                                     room.add_event(presentationObject)
 
