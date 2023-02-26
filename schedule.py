@@ -4,6 +4,7 @@ from datetime import date, datetime
 from pathlib import Path
 import html
 import json
+import re
 import urllib.parse
 from xml.dom import minidom
 
@@ -92,8 +93,7 @@ with open("cache/index.json") as file:
                                     title = html.unescape(presentationData['presentation']['title'])
                                     # some titles are put into unnecessary html tags, which we want to clean away
                                     # e.g. <p data-pm-slice="1 1 []">Ground Truth-Erstellung und Modelltraining mit eScriptorium</p>
-                                    if title[0] == "<" and title[-1] == ">":
-                                        title = title[title.find(">")+1:title.rfind("<")]
+                                    title = re.sub("<[^<>]*>", "", title)
                                     # add the prefix "S" with session id to the title of the presentations
                                     if len(startingTimes) > 1:
                                         title = "S" + str(session['id']) + ": " + title
