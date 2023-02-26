@@ -34,8 +34,12 @@ presentationUrl = apiUrl + '/program/presentations/'
 # Options:
 #    https://bid2022.planner.documedias.systems/api/program/options
 
+
+# reliably open a file in the same directory as the current script
+p = Path(__file__)
+
 # download main data
-with open('index.json', 'w') as outfile:
+with p.with_name('index.json').open('w') as outfile:
     data = []
     for day in range(1, numberOfDays + 1):
         req = requests.get(apiUrl + "/program/days/" + str(day), verify=False)
@@ -53,13 +57,13 @@ for session in data:
     data = req.json()
     if len(data) > 1:
         print("Unexpected format for session" + sessionId)
-    with open('s' + sessionId + '.json', 'w') as outfile:
+    with p.with_name('s' + sessionId + '.json').open('w') as outfile:
         json.dump(data, outfile, indent=4)
     if 'presentations' in data[0]:
         for presentation in data[0]['presentations']:
             presentationIds.append(presentation["presentation"]["id"])
 
-with open('presentationtIds', 'w') as outfile:
+with p.with_name('presentationtIds', 'w').open('w') as outfile:
     json.dump(presentationIds, outfile, indent=4)
 
 # download details of all presentations
@@ -85,5 +89,5 @@ for presentationId in presentationIds:
                 data[0]["abstract_enriched"] = abstract
         else:
             print(req.status_code, "Error when requesting the abstract", abstractUrl, "for presentation", presentationId, data[0]["title"])
-    with open('p' + str(presentationId) + '.json', 'w') as outfile:
+    with p.with_name('p' + str(presentationId) + '.json', 'w').open('w') as outfile:
         json.dump(data, outfile, indent=4)
