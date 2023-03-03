@@ -63,7 +63,7 @@ for session in data:
         for presentation in data[0]['presentations']:
             presentationIds.append(presentation["presentation"]["id"])
 
-with p.with_name('presentationtIds', 'w').open('w') as outfile:
+with p.with_name('presentationtIds').open('w') as outfile:
     json.dump(presentationIds, outfile, indent=4)
 
 # download details of all presentations
@@ -89,5 +89,5 @@ for presentationId in presentationIds:
                 data[0]["abstract_enriched"] = abstract
         else:
             print(req.status_code, "Error when requesting the abstract", abstractUrl, "for presentation", presentationId, data[0]["title"])
-    with p.with_name('p' + str(presentationId) + '.json', 'w').open('w') as outfile:
+    with p.with_name('p' + str(presentationId) + '.json').open('w') as outfile:
         json.dump(data, outfile, indent=4)
