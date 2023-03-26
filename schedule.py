@@ -34,6 +34,7 @@ with open("cache/index.json") as file:
     rooms = [
         "Kuppelsaal",
         "Niedersachsenhalle A (mit Streaming)",
+        "Niedersachsenhalle B",
         "Eilenriedehalle B",
         "Blauer Saal",
         "Roter Saal (mit Streaming)",
@@ -42,6 +43,7 @@ with open("cache/index.json") as file:
         "Runder Saal",
         "Future Meeting Space A",
         "Future Meeting Space B",
+        "#Freiraum 23",
         "Konferenzraum 7 & 9",
         "Konferenzraum 8 & 10",
         "Konferenzraum 11 & 13",
