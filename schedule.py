@@ -44,6 +44,7 @@ with open("cache/index.json") as file:
         "Future Meeting Space A",
         "Future Meeting Space B",
         "#Freiraum 23",
+        "Stand der Verbände (Ausstellung)",
         "Konferenzraum 7 & 9",
         "Konferenzraum 8 & 10",
         "Konferenzraum 11 & 13",

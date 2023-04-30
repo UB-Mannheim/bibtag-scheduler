@@ -9,6 +9,7 @@ from pathlib import Path
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
+DEBUG = False
 numberOfDays = 4
 apiUrl = 'https://dbt2023.planner.documedias.systems/api'
 # For 2022:
@@ -49,10 +50,12 @@ with p.with_name('index.json').open('w') as outfile:
 
 # download details of all sessions
 presentationIds = []
+print("Download details for all sessions. Expected time for that is at least", 2*len(data)/60, "minutes.")
 for session in data:
     sessionId = str(session["id"])
     time.sleep(2)
-    print("Download session details for", sessionId)
+    if DEBUG:
+        print("Download session details for", sessionId)
     req = requests.get(sessionUrl + sessionId, verify=False)
     data = req.json()
     if len(data) > 1:
@@ -67,9 +70,11 @@ with p.with_name('presentationtIds').open('w') as outfile:
     json.dump(presentationIds, outfile, indent=4)
 
 # download details of all presentations
+print("Download details for all presentations. Expected time for that is at least", 2*len(presentationIds)/60, "minutes.")
 for presentationId in presentationIds:
     time.sleep(2)
-    print("Download presentation details for", presentationId)
+    if DEBUG:
+        print("Download presentation details for", presentationId)
     req = requests.get(presentationUrl + str(presentationId), verify=False)
 
     data = req.json()
