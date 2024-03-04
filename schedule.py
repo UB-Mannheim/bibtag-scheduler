@@ -15,46 +15,27 @@ from pentabarf.Person import Person
 from pentabarf.Room import Room
 
 conference = Conference(
-    title="BiblioCon 2023",
-    start=date(2023, 5, 23),
-    end=date(2023, 5, 26),
+    title="BiblioCon 2024",
+    start=date(2024, 6, 4),
+    end=date(2024, 6, 7),
     days=4,
     timeslot_duration="00:30",
-    venue="Hannover Congress Centrum",
-    city="Hannover"
+    venue="Congress Center Hamburg",
+    city="Hamburg"
 )
 
 with open("cache/index.json") as file:
     data = json.load(file)
-    allDays = ["2023-05-23", "2023-05-24", "2023-05-25", "2023-05-26"]
+    allDays = ["2024-06-04", "2024-06-05", "2024-06-06", "2024-06-07"]
     differentDays = [x['day']['date'] for x in data if x['day']['date'] not in allDays]
     if len(differentDays) > 0:
         print("ERROR: different days are found, which has to fixed before continuing", differentDays)
         exit()
-    rooms = [
-        "Kuppelsaal",
-        "Niedersachsenhalle A (mit Streaming)",
-        "Niedersachsenhalle B",
-        "Eilenriedehalle B",
-        "Blauer Saal",
-        "Roter Saal (mit Streaming)",
-        "Konferenzraum 27/28",
-        "Bonatz Saal (mit Streaming)",
-        "Runder Saal",
-        "Future Meeting Space A",
-        "Future Meeting Space B",
-        "#Freiraum 23",
-        "Stand der Verbände (Ausstellung)",
-        "Konferenzraum 7 & 9",
-        "Konferenzraum 8 & 10",
-        "Konferenzraum 11 & 13",
-        "Konferenzraum 12 & 14",
-        "Konferenzraum 15",
-        "Konferenzraum 16",
-        "Konferenzraum 17",
-        "Konferenzraum 18",
-        "Foyers",
-    ]
+    if Path('cache/rooms.json').is_file():
+        with open('cache/rooms.json') as roomsFile:
+            roomsData = json.load(roomsFile)
+    sorted_roomsData = sorted(roomsData, key=lambda x: x['order'])
+    rooms = [room['name'] for room in sorted_roomsData]
     differentRooms = [x['room']['name'] for x in data if x['room']['name'] not in rooms]
     if len(differentRooms) > 0:
         print("ERROR: different rooms are found, which has to fixed before continuing", differentRooms)
@@ -114,7 +95,7 @@ with open("cache/index.json") as file:
 
                                     abstract = ""
                                     if len(startingTimes) > 1:
-                                        sessionUrl = "https://dbt2023.abstractserver.com/program/#/details/sessions/" + session['id']
+                                        sessionUrl = "https://bibliocon2024.abstractserver.com/program/#/details/sessions/" + session['id']
                                         abstract = "Session: <a href='" + sessionUrl + "'>" + session['title'] + " (S" + session['id'] + ")</a><br/><br/>"
                                         #if session['content']['outline'] is not None:
                                         #    print('WARN: outline for this session is ignored', session['id'], session['content']['outline'])
@@ -145,8 +126,12 @@ with open("cache/index.json") as file:
                                         type='Vortrag'
                                     )
 
-                                    # personList = []
-                                    for author in presentationData['presentation']['persons']:
+                                    personList = presentationData['presentation']['persons']
+                                    # sometimes we have exactly one presentation in a session but the asssociated
+                                    # person is only mentioned at the session level, e.g. Arbeitssitzung
+                                    if len(personList) == 0 and len(startingTimes) == 1:
+                                        personList = sessionData['persons']
+                                    for author in personList:
                                         authorName = author['person']['first_name'] + ' ' + author['person']['last_name']
                                         person = Person(name=authorName, id=author['person']['id'])
                                         presentationObject.add_person(person)
@@ -173,9 +158,9 @@ with open("cache/index.json") as file:
                 # add event for the whole session when no events are yet added
                 if not eventsAdded:
 
+                    if not abstract:
+                        abstract = ""
                     if 'content' in session and 'outline' in session['content'] and session['content']['outline'] != None:
-                        if not abstract:
-                            abstract = ""
                         abstract = session['content']['outline'] + abstract
                     if 'target_group' in session['content'] and session['content']['target_group'] is not None:
                         abstract += "<p><strong>Zielgruppe:</strong> " + session['content']['target_group'] + "</p>"
@@ -227,10 +212,10 @@ for node in reparsed.getElementsByTagName('person'):
         node.removeAttribute('id')
 
 # Output in file
-with open("bibliocon23.xml", 'w', encoding="utf-8") as outfile:
+with open("bibliocon24.xml", 'w', encoding="utf-8") as outfile:
     outfile.write(reparsed.toprettyxml(indent="  "))
 # Save another copy which will not be overwritten, when rerun on another day
-name = "bibliocon23-" + str(date.today()) + ".xml"
+name = "bibliocon24-" + str(date.today()) + ".xml"
 with open(name, 'w', encoding="utf-8") as outfile:
     outfile.write(reparsed.toprettyxml(indent="  "))
 # Inspect differences in the output files with e.g. git diff
