@@ -115,6 +115,9 @@ with open("cache/index.json") as file:
                                     if 'stich_schlagwort' in presentationFileData['content'] and presentationFileData['content']['stich_schlagwort'] is not None:
                                         abstract += "<p><strong>Stichworte:</strong> " + presentationFileData['content']['stich_schlagwort'] + "</p>"
 
+                                    # escape the asterisk because otherwise this is interpreted as change to italics
+                                    abstract = abstract.replace("*", "&#42;");
+
                                     presentationObject = Event(
                                         id='p' + str(presentationData['presentation']['id']),
                                         date=datetime.fromisoformat(dayText + "T" + start + ":00+02:00"),
@@ -129,12 +132,17 @@ with open("cache/index.json") as file:
                                     personList = presentationData['presentation']['persons']
                                     # sometimes we have exactly one presentation in a session but the asssociated
                                     # person is only mentioned at the session level, e.g. Arbeitssitzung
-                                    if len(personList) == 0 and len(startingTimes) == 1:
-                                        personList = sessionData['persons']
+                                    # or persons are splitted over session and presentation levels, e.g.
+                                    # Hands-on-Lab, Podiumsdiskussion
+                                    if len(startingTimes) == 1:
+                                        personList = sessionData['persons'] + personList
+                                    seenIds = []
                                     for author in personList:
-                                        authorName = author['person']['first_name'] + ' ' + author['person']['last_name']
-                                        person = Person(name=authorName, id=author['person']['id'])
-                                        presentationObject.add_person(person)
+                                        if author['person']['id'] not in seenIds:
+                                            authorName = author['person']['first_name'] + ' ' + author['person']['last_name']
+                                            person = Person(name=authorName, id=author['person']['id'])
+                                            presentationObject.add_person(person)
+                                            seenIds += [author['person']['id']]
 
                                     room.add_event(presentationObject)
 
@@ -166,7 +174,12 @@ with open("cache/index.json") as file:
                         abstract += "<p><strong>Zielgruppe:</strong> " + session['content']['target_group'] + "</p>"
                     if 'stich_schlagwort' in session['content'] and session['content']['stich_schlagwort'] is not None:
                         abstract += "<p><strong>Stichworte:</strong> " + session['content']['stich_schlagwort'] + "</p>"
+
+                    # escape the asterisk because otherwise this is interpreted as change to italics
+                    abstract = abstract.replace("*", "&#42;");
+
                     duration = (session['end_time_timestamp'] - session['start_time_timestamp'] ) // 60
+
                     sessionObject = Event(
                         id=session['id'],
                         date=datetime.fromisoformat(dayText + "T" + session['start_time'] + ":00+02:00"),
