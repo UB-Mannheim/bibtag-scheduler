@@ -94,6 +94,9 @@ for presentationId in presentationIds:
     if DEBUG:
         print("Download presentation details for", presentationId)
     req = requests.get(presentationUrl + str(presentationId), verify=False)
+    if not req:
+        print("Failure", req.status_code, "for downloading presentation detail for", presentationId)
+        continue
     data = req.json()
     if len(data) > 1:
         print("Unexpected format for presentation" + presentationId)
