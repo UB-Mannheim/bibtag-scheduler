@@ -148,7 +148,7 @@ with open("cache/index.json") as file:
 
                                 eventsAdded = True
                             else:
-                                print("WARNING: Found several presentations at the same time in this session", session['id'], session['title'], session['session_type']['name'])
+                                print("WARNING: Session", session['id'], '"' + session['title'] + '"', "contains several presentations at the same time:", startingTimes)
                                 # create an abstract for the whole session which will be added below
                                 abstract = "<ul>"
                                 for presentationData in sessionData['presentations']:
@@ -161,7 +161,7 @@ with open("cache/index.json") as file:
 
                             endingTimes = [x['end_time'] for x in sessionData['presentations']]
                             if session['end_time'] not in endingTimes:
-                                print("WARNING: Session goes longer than any presentation", session['id'], session['title'], dayText, session['start_time'], session['end_time'])
+                                print("WARNING: Session", session['id'], '"' + session['title'] + '"', "on", sessionData['day']['day_name'].capitalize(), "runs until",  session['end_time'], "which differs from the ending times of any presentation:", endingTimes)
 
                 # add event for the whole session when no events are yet added
                 if not eventsAdded:
