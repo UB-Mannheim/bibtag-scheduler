@@ -152,7 +152,7 @@ with open("cache/index.json") as file:
                                 # create an abstract for the whole session which will be added below
                                 abstract = "<ul>"
                                 for presentationData in sessionData['presentations']:
-                                    abstract += "<li>" + presentationData['start_time'] + "-" + presentationData['end_time'] + ": " + presentationData['presentation']['title']
+                                    abstract += "<li>" + presentationData['presentation']['title']
                                     if 'persons' in presentationData['presentation']:
                                         for author in presentationData['presentation']['persons']:
                                             abstract += '<br/>' + author['person']['first_name'] + ' ' + author['person']['last_name']
