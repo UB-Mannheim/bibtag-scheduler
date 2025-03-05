@@ -15,18 +15,18 @@ from pentabarf.Person import Person
 from pentabarf.Room import Room
 
 conference = Conference(
-    title="BiblioCon 2024",
-    start=date(2024, 6, 4),
-    end=date(2024, 6, 7),
+    title="Bibliothekskongress 2025",
+    start=date(2025, 6, 24),
+    end=date(2025, 6, 27),
     days=4,
     timeslot_duration="00:30",
-    venue="Congress Center Hamburg",
-    city="Hamburg"
+    venue="Messe und Congress Centrum Bremen",
+    city="Bremen"
 )
 
 with open("cache/index.json") as file:
     data = json.load(file)
-    allDays = ["2024-06-04", "2024-06-05", "2024-06-06", "2024-06-07"]
+    allDays = ["2025-06-24", "2025-06-25", "2025-06-26", "2025-06-27"]
     differentDays = [x['day']['date'] for x in data if x['day']['date'] not in allDays]
     if len(differentDays) > 0:
         print("ERROR: different days are found, which has to fixed before continuing", differentDays)
@@ -42,9 +42,8 @@ with open("cache/index.json") as file:
         exit()
 
     for dayText in allDays:
-        time = datetime.strptime(dayText, "%Y-%m-%d").isoformat('T')#temp
+        time = datetime.strptime(dayText, "%Y-%m-%d").isoformat('T')
         day = Day(date=datetime.strptime(dayText, "%Y-%m-%d"))
-        #day = Day(date=date.fromisoformat(dayText))
         for roomName in rooms:
             correspondingSessions = [x for x in data if x['room']['name'] == roomName and x['day']['date'] == dayText]
             room = Room(name=roomName)
@@ -225,10 +224,10 @@ for node in reparsed.getElementsByTagName('person'):
         node.removeAttribute('id')
 
 # Output in file
-with open("bibliocon24.xml", 'w', encoding="utf-8") as outfile:
+with open("bibliocon25.xml", 'w', encoding="utf-8") as outfile:
     outfile.write(reparsed.toprettyxml(indent="  "))
 # Save another copy which will not be overwritten, when rerun on another day
-name = "bibliocon24-" + str(date.today()) + ".xml"
+name = "bibliocon25-" + str(date.today()) + ".xml"
 with open(name, 'w', encoding="utf-8") as outfile:
     outfile.write(reparsed.toprettyxml(indent="  "))
 # Inspect differences in the output files with e.g. git diff

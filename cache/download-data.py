@@ -12,9 +12,10 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 DEBUG = False
 numberOfDays = 4
-apiUrl = 'https://bibliocon2024.planner.documedias.systems/api/'
+apiUrl = 'https://bid2025.planner.documedias.systems/api/'
 
 # Previous years
+# apiUrl = 'https://bibliocon2024.planner.documedias.systems/api/'
 # apiUrl = 'https://dbt2023.planner.documedias.systems/api'
 # apiUrl = 'https://bid2022.planner.documedias.systems/api'
 
@@ -34,10 +35,9 @@ presentationUrl = apiUrl + '/program/presentations/'
 # Abstract (will be handled later):
 #    https://bibliocon2024.abstract.documedias.systems/api/v1/manager/abstract/multi/html/id/252/template/planner_preview
 # Rooms:
-#    https://bibliocon2024.planner.documedias.systems/api/program/rooms/2
+#    https://bid2025.planner.documedias.systems/api/program/rooms/2
 # Options:
 #    https://bibliocon2024.planner.documedias.systems/api/program/options
-
 
 
 # reliably open a file in the same directory as the current script
