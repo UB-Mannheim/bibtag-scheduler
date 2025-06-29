@@ -94,7 +94,7 @@ with open("cache/index.json") as file:
 
                                     abstract = ""
                                     if len(startingTimes) > 1:
-                                        sessionUrl = "https://bibliocon2024.abstractserver.com/program/#/details/sessions/" + session['id']
+                                        sessionUrl = "https://bid2025.abstractserver.com/program/#/details/sessions/" + session['id']
                                         abstract = "Session: <a href='" + sessionUrl + "'>" + session['title'] + " (S" + session['id'] + ")</a><br/><br/>"
                                         #if session['content']['outline'] is not None:
                                         #    print('WARN: outline for this session is ignored', session['id'], session['content']['outline'])
