@@ -15,18 +15,20 @@ from pentabarf.Person import Person
 from pentabarf.Room import Room
 
 conference = Conference(
-    title="Bibliothekskongress 2025",
-    start=date(2025, 6, 24),
-    end=date(2025, 6, 27),
+    title="BiblioCon 2026",
+    start=date(2026, 5, 19),
+    end=date(2026, 5, 22),
     days=4,
     timeslot_duration="00:30",
-    venue="Messe und Congress Centrum Bremen",
-    city="Bremen"
+    venue="ESTREL Berlin",
+    city="Berlin"
 )
+
+confName = "bibliocon2026"
 
 with open("cache/index.json") as file:
     data = json.load(file)
-    allDays = ["2025-06-24", "2025-06-25", "2025-06-26", "2025-06-27"]
+    allDays = ["2026-05-19", "2026-05-20", "2026-05-21", "2026-05-22"]
     differentDays = [x['day']['date'] for x in data if x['day']['date'] not in allDays]
     if len(differentDays) > 0:
         print("ERROR: different days are found, which has to fixed before continuing", differentDays)
@@ -94,7 +96,7 @@ with open("cache/index.json") as file:
 
                                     abstract = ""
                                     if len(startingTimes) > 1:
-                                        sessionUrl = "https://bid2025.abstractserver.com/program/#/details/sessions/" + session['id']
+                                        sessionUrl = "https://" + confName + ".abstractserver.com/program/#/details/sessions/" + session['id']
                                         abstract = "Session: <a href='" + sessionUrl + "'>" + session['title'] + " (S" + session['id'] + ")</a><br/><br/>"
                                         #if session['content']['outline'] is not None:
                                         #    print('WARN: outline for this session is ignored', session['id'], session['content']['outline'])
@@ -128,12 +130,14 @@ with open("cache/index.json") as file:
                                         type='Vortrag'
                                     )
 
+                                    if 'persons' not in presentationData['presentation']:
+                                        presentationData['presentation']['persons'] = []
                                     personList = presentationData['presentation']['persons']
                                     # sometimes we have exactly one presentation in a session but the asssociated
                                     # person is only mentioned at the session level, e.g. Arbeitssitzung
                                     # or persons are splitted over session and presentation levels, e.g.
                                     # Hands-on-Lab, Podiumsdiskussion
-                                    if len(startingTimes) == 1:
+                                    if len(startingTimes) == 1 and 'persons' in sessionData:
                                         personList = sessionData['persons'] + personList
                                     seenIds = []
                                     for author in personList:
@@ -224,10 +228,10 @@ for node in reparsed.getElementsByTagName('person'):
         node.removeAttribute('id')
 
 # Output in file
-with open("bibliocon25.xml", 'w', encoding="utf-8") as outfile:
+with open(confName + ".xml", 'w', encoding="utf-8") as outfile:
     outfile.write(reparsed.toprettyxml(indent="  "))
 # Save another copy which will not be overwritten, when rerun on another day
-name = "bibliocon25-" + str(date.today()) + ".xml"
+name = confName + "-" + str(date.today()) + ".xml"
 with open(name, 'w', encoding="utf-8") as outfile:
     outfile.write(reparsed.toprettyxml(indent="  "))
 # Inspect differences in the output files with e.g. git diff

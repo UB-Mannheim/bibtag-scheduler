@@ -12,9 +12,10 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 DEBUG = False
 numberOfDays = 4
-apiUrl = 'https://bid2025.planner.documedias.systems/api/'
+apiUrl = 'https://bibliocon2026.planner.documedias.systems/api'
 
 # Previous years
+# apiUrl = 'https://bid2025.planner.documedias.systems/api/'
 # apiUrl = 'https://bibliocon2024.planner.documedias.systems/api/'
 # apiUrl = 'https://dbt2023.planner.documedias.systems/api'
 # apiUrl = 'https://bid2022.planner.documedias.systems/api'

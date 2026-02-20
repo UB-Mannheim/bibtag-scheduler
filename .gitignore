@@ -4,10 +4,12 @@
 /cache2022
 /cache2023
 /cache2024
+/cache2025
 .idea
 output.xml
 bibtag22*.xml
 bibliocon23*.xml
 bibliocon24*.xml
 bibliocon25*.xml
+bibliocon26*.xml
 /venv
