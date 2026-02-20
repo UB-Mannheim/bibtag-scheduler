@@ -7,7 +7,7 @@ Erzeugt eine Pentabarf XML Datei aus dem online Programm der BiblioCon,
 so dass Open Source Apps wie Giggity zur Anzeige des Programms auf mobilen
 Geräten genutzt werden können, z.B.
 
-<img src="https://rawgit.com/UB-Mannheim/ubma-screenshots/master/bibtag-scheduler/giggity-by-rooms.jpg" width="200"/> <img src="https://rawgit.com/UB-Mannheim/ubma-screenshots/master/bibtag-scheduler/giggity-presentation.jpg" width="200"/> <img src="https://rawgit.com/UB-Mannheim/ubma-screenshots/master/bibtag-scheduler/giggity-suche.jpg" width="200"/> <img src="https://rawgit.com/UB-Mannheim/ubma-screenshots/master/bibtag-scheduler/giggity-programm.jpg" width="200"/> 
+<img src="https://raw.githubusercontent.com/UB-Mannheim/ubma-screenshots/refs/heads/master/bibtag-scheduler/giggity-by-rooms.jpg" width="200"/> <img src="https://raw.githubusercontent.com/UB-Mannheim/ubma-screenshots/refs/heads/master/bibtag-scheduler/giggity-presentation.jpg" width="200"/> <img src="https://raw.githubusercontent.com/UB-Mannheim/ubma-screenshots/refs/heads/master/bibtag-scheduler/giggity-suche.jpg" width="200"/> <img src="https://raw.githubusercontent.com/UB-Mannheim/ubma-screenshots/refs/heads/master/bibtag-scheduler/giggity-programm.jpg" width="200"/> 
 
 
 ## Nutzung als mobile Version des Programms mit Giggity
